@@ -15,8 +15,7 @@ out/
 .agent-sessions/
 .claude/
 .codex/
-claude-worktrees/
-codex-worktrees/
+review/
 __pycache__/
 *.png
 *.jpg
@@ -36,3 +35,25 @@ docs/governance/taxonomy-reference.md
 scripts/review_scope_guard.py
 scripts/check_pr_scope.py
 scripts/local_agent/mlx_runner.py
+
+# CodeGraphContext recommended baseline additions
+.DS_Store
+.venv*/
+.idea/
+.vscode/
+*.pyc
+*.pyo
+*.egg-info/
+.tox/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+coverage/
+.next/
+*.log
+*.sqlite*
+*.bz2
+*.xz
+*.zst
+*.7z
+*.rar
