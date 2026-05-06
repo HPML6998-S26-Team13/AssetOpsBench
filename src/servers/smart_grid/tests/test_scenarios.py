@@ -35,7 +35,12 @@ def _load(filename: str) -> list[dict]:
 
 def test_smart_grid_scenarios_count():
     records = _load("smart_grid.json")
-    assert len(records) == 11
+    # Phase-2 floor: 11 hand-picked subset → expanded to the full HPML
+    # 31-scenario corpus (HPML #15 closed at 15+, HPML #33 closed at 30+)
+    # in this PR. AOB-FMSR-001 is the original AOB-style scenario; the
+    # other 30 are SGT-NNN ports from data/scenarios/*.json in the HPML
+    # repo, format-identical (same field set, same ground_truth shape).
+    assert len(records) == 31
 
 
 def test_smart_grid_negative_checks_count():
