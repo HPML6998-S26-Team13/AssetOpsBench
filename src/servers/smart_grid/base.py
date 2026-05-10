@@ -154,6 +154,34 @@ def load_fault_records() -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
+# Boundary helpers
+# ---------------------------------------------------------------------------
+
+
+def json_safe_record(record: dict) -> dict:
+    """Normalize a row dict so it serializes under ``json.dumps(allow_nan=False)``.
+
+    Smart Grid tools commonly return a single CSV row via ``df.iloc[0].to_dict()``
+    or a list of records via ``df.to_dict(orient="records")``. Both paths can
+    leak ``pandas.Timestamp`` (from ``parse_dates``) and NaN floats through to
+    the MCP JSON-RPC response, where the strict serializer rejects them.
+
+    This helper is the canonical boundary normalizer: NaN-likes (including
+    ``pd.NaT``) become ``None``, ``pandas.Timestamp`` becomes its ISO date
+    string, all other values pass through unchanged.
+    """
+    normalized: dict = {}
+    for key, value in record.items():
+        if pd.isna(value):
+            normalized[key] = None
+        elif isinstance(value, pd.Timestamp):
+            normalized[key] = value.date().isoformat()
+        else:
+            normalized[key] = value
+    return normalized
+
+
+# ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
 

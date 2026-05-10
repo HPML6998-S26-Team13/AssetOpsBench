@@ -28,7 +28,11 @@ from datetime import UTC, datetime
 import pandas as pd
 from mcp.server.fastmcp import FastMCP
 
-from servers.smart_grid.base import load_asset_metadata, load_fault_records
+from servers.smart_grid.base import (
+    json_safe_record,
+    load_asset_metadata,
+    load_fault_records,
+)
 
 mcp = FastMCP("smart-grid-wo")
 
@@ -48,10 +52,6 @@ _DOWNTIME_ESTIMATES = {
 
 _VALID_PRIORITIES = {"low", "medium", "high", "critical"}
 _VALID_STATUSES = {"open", "in_progress", "resolved", "closed"}
-
-
-def _normalize_record(record: dict) -> dict:
-    return {key: (None if pd.isna(value) else value) for key, value in record.items()}
 
 
 def _normalize_priority(priority: str | None) -> str | None:
@@ -119,7 +119,7 @@ def list_fault_records(
         ]
 
     records = df.head(min(limit, 100)).to_dict(orient="records")
-    return [_normalize_record(record) for record in records]
+    return [json_safe_record(record) for record in records]
 
 
 @mcp.tool()
@@ -136,7 +136,7 @@ def get_fault_record(fault_id: str) -> dict:
     row = df[df["fault_id"] == fault_id]
     if row.empty:
         return {"error": f"Fault record '{fault_id}' not found."}
-    return _normalize_record(row.iloc[0].to_dict())
+    return json_safe_record(row.iloc[0].to_dict())
 
 
 @mcp.tool()
