@@ -37,10 +37,14 @@ def test_smart_grid_scenarios_count():
     records = _load("smart_grid.json")
     # Phase-2 floor: 11 hand-picked subset → expanded to the full HPML
     # 31-scenario corpus (HPML #15 closed at 15+, HPML #33 closed at 30+)
-    # in this PR. AOB-FMSR-001 is the original AOB-style scenario; the
-    # other 30 are SGT-NNN ports from data/scenarios/*.json in the HPML
+    # → 61-scenario corpus after the HPML #55 / AOB #36 50+ expansion
+    # ports SGT-031..SGT-050 (gap-fill, including the 5 generated promoted
+    # in HPML PR #195) and SGT-051..SGT-060 (capability-targeted batch
+    # carrying the new optional benchmark_design + must_NOT_include
+    # fields). AOB-FMSR-001 is the original AOB-style scenario; the
+    # other 60 are SGT-NNN ports from data/scenarios/*.json in the HPML
     # repo, format-identical (same field set, same ground_truth shape).
-    assert len(records) == 31
+    assert len(records) == 61
 
 
 def test_smart_grid_negative_checks_count():
