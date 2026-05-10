@@ -114,6 +114,19 @@ def _ratio_field(value: float) -> tuple:
     return round(value, 4), False
 
 
+def _json_safe_record(record: dict) -> dict:
+    """Normalize pandas values before returning records through MCP JSON-RPC."""
+    normalized = {}
+    for key, value in record.items():
+        if pd.isna(value):
+            normalized[key] = None
+        elif isinstance(value, pd.Timestamp):
+            normalized[key] = value.date().isoformat()
+        else:
+            normalized[key] = value
+    return normalized
+
+
 def _rogers_ratio(h2: float, ch4: float, c2h2: float, c2h4: float, c2h6: float) -> dict:
     """Apply Rogers Ratio method; return IEC code and description.
 
@@ -273,7 +286,7 @@ def get_dga_record(transformer_id: str) -> dict:
     if row.empty:
         return {"error": f"No DGA record found for '{transformer_id}'."}
     record = row.iloc[0].to_dict()
-    return {key: (None if pd.isna(value) else value) for key, value in record.items()}
+    return _json_safe_record(record)
 
 
 @mcp.tool()

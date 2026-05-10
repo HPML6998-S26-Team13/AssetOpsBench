@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json as _json
 
+from servers.smart_grid.fmsr import main as fmsr
 from servers.smart_grid.fmsr.main import analyze_dga
 
 # T-018 representative profile from the source project's processed DGA records:
@@ -125,3 +126,24 @@ def test_analyze_dga_string_inputs_coerced():
     # LLM tool clients sometimes stringify numeric args.
     result = analyze_dga(h2="35", ch4="6", c2h2="482", c2h4="26", c2h6="3")
     assert result["iec_code"] == "D1"
+
+
+def test_get_dga_record_sample_date_is_json_safe(tmp_path, monkeypatch):
+    (tmp_path / "dga_records.csv").write_text(
+        "\n".join(
+            [
+                "transformer_id,sample_date,dissolved_h2_ppm,dissolved_ch4_ppm,"
+                "dissolved_c2h2_ppm,dissolved_c2h4_ppm,dissolved_c2h6_ppm,"
+                "dissolved_co_ppm,dissolved_co2_ppm,fault_label,source_dataset",
+                "T-001,2026-01-02,10,20,1,30,40,100,200,T1,unit-test",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("SG_DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(fmsr, "_dga_records", None)
+
+    result = fmsr.get_dga_record("T-001")
+
+    assert result["sample_date"] == "2026-01-02"
+    _json.dumps(result, allow_nan=False)
