@@ -38,6 +38,10 @@ def _load(filename: str) -> list[dict]:
     return raw
 
 
+def _non_empty_string(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
 def test_smart_grid_scenarios_count():
     records = _load("smart_grid.json")
     # AOB-FMSR-001 is the original AOB-style scenario. The other 60
@@ -105,10 +109,10 @@ def test_smart_grid_capability_targeted_rubric_fields_preserved():
     for raw in benchmark_design_records:
         design = raw["benchmark_design"]
         assert isinstance(design, dict), raw["id"]
-        assert design.get("target_capability"), raw["id"]
-        assert design.get("discrimination_hypothesis"), raw["id"]
+        assert _non_empty_string(design.get("target_capability")), raw["id"]
+        assert _non_empty_string(design.get("discrimination_hypothesis")), raw["id"]
 
     for raw in must_not_include_records:
         excluded = raw["ground_truth"]["must_NOT_include"]
         assert isinstance(excluded, list) and excluded, raw["id"]
-        assert all(isinstance(item, str) and item for item in excluded), raw["id"]
+        assert all(_non_empty_string(item) for item in excluded), raw["id"]
