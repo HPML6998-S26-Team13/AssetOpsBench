@@ -80,15 +80,25 @@ export SG_DATA_DIR=$(pwd)/data/processed
 convention: each file is a JSON array and each record has an `id`, `type`,
 `text`, `category`, and `characteristic_form`.
 
+The main Smart Grid corpus contains 61 records: the original AOB-style
+`AOB-FMSR-001` catalogue probe plus `SGT-001` through `SGT-060` from the
+SmartGridBench source project. `SGT-036` through `SGT-050` fill domain-coverage
+gaps across FMSR, IoT, TSFM, work-order, and multi-tool paths. `SGT-051`
+through `SGT-060` are capability-targeted checks designed to distinguish
+calibrated, evidence-grounded agents from models that fabricate data, ignore
+tool-result conflicts, or miss strict output constraints.
+
 Smart Grid records also carry evaluator-facing metadata:
 
 | Field | Purpose |
 |---|---|
 | `asset_id` | Transformer identifier used by the scenario, when applicable. |
+| `benchmark_design` | Optional capability-targeting metadata for discrimination-focused scenarios. |
 | `difficulty` | Coarse difficulty label (`easy`, `medium`, or `hard`). |
 | `domain_tags` | Smart Grid domains exercised by the prompt. |
 | `expected_tools` | Intended tool path, using `iot.*`, `fmsr.*`, `tsfm.*`, and `wo.*` names. |
 | `ground_truth` | Lightweight grading hints such as required concepts, thresholds, or intermediate values. |
+| `ground_truth.must_NOT_include` | Optional negative rubric items that should not appear in a correct answer. |
 
 These extended fields are advisory metadata for evaluators and are safe for
 scenario consumers to ignore if they only need the core AOB prompt fields.

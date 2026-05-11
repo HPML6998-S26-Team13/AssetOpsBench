@@ -40,9 +40,9 @@ def _load(filename: str) -> list[dict]:
 
 def test_smart_grid_scenarios_count():
     records = _load("smart_grid.json")
-    # AOB-FMSR-001 is the original AOB-style scenario. The other 35
+    # AOB-FMSR-001 is the original AOB-style scenario. The other 60
     # records are SGT-NNN ports from the HPML Smart Grid MCP scenario corpus.
-    assert len(records) == 36
+    assert len(records) == 61
 
 
 def test_smart_grid_negative_checks_count():
@@ -80,3 +80,35 @@ def test_smart_grid_scenario_ids_unique():
     neg = _load("smart_grid_negative_checks.json")
     ids = [r["id"] for r in main + neg]
     assert len(ids) == len(set(ids)), f"duplicate scenario IDs detected: {ids}"
+
+
+def test_smart_grid_full_corpus_ids_present():
+    ids = {record["id"] for record in _load("smart_grid.json")}
+    expected = {"AOB-FMSR-001"} | {f"SGT-{index:03d}" for index in range(1, 61)}
+    assert ids == expected
+
+
+def test_smart_grid_capability_targeted_rubric_fields_preserved():
+    records = _load("smart_grid.json")
+
+    benchmark_design_records = [r for r in records if "benchmark_design" in r]
+    must_not_include_records = [
+        r
+        for r in records
+        if isinstance(r.get("ground_truth"), dict)
+        and "must_NOT_include" in r["ground_truth"]
+    ]
+
+    assert len(benchmark_design_records) >= 10
+    assert len(must_not_include_records) >= 13
+
+    for raw in benchmark_design_records:
+        design = raw["benchmark_design"]
+        assert isinstance(design, dict), raw["id"]
+        assert design.get("target_capability"), raw["id"]
+        assert design.get("discrimination_hypothesis"), raw["id"]
+
+    for raw in must_not_include_records:
+        excluded = raw["ground_truth"]["must_NOT_include"]
+        assert isinstance(excluded, list) and excluded, raw["id"]
+        assert all(isinstance(item, str) and item for item in excluded), raw["id"]
